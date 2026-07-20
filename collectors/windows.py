@@ -18,7 +18,7 @@ import getpass
 import platform
 
 from logger import logger
-from utils import execute_command
+from utils import run_command
 
 # ==========================================================
 # Collector Information
@@ -71,7 +71,7 @@ def logged_in_users():
 
     logger.info("Collecting logged in users...")
 
-    users = execute_command(
+    users = run_command(
 
         "query user"
 
@@ -92,7 +92,7 @@ def running_processes():
 
     logger.info("Collecting running processes...")
 
-    processes = execute_command(
+    processes = run_command(
 
         "tasklist"
 
@@ -113,7 +113,7 @@ def running_services():
 
     logger.info("Collecting running services...")
 
-    services = execute_command(
+    services = run_command(
 
         "sc query type= service state= all"
 
@@ -132,7 +132,7 @@ def ip_configuration():
 
     logger.info("Collecting IP configuration...")
 
-    ipconfig = execute_command(
+    ipconfig = run_command(
 
         "ipconfig /all"
 
@@ -153,7 +153,7 @@ def listening_ports():
 
     logger.info("Collecting listening ports...")
 
-    ports = execute_command(
+    ports = run_command(
 
         "netstat -ano"
 
@@ -174,7 +174,7 @@ def network_connections():
 
     logger.info("Collecting active network connections...")
 
-    connections = execute_command(
+    connections = run_command(
 
         "netstat -anob"
 
@@ -195,7 +195,7 @@ def routing_table():
 
     logger.info("Collecting routing table...")
 
-    routes = execute_command(
+    routes = run_command(
 
         "route print"
 
@@ -216,7 +216,7 @@ def scheduled_tasks():
 
     logger.info("Collecting scheduled tasks...")
 
-    tasks = execute_command(
+    tasks = run_command(
 
         "schtasks"
 
@@ -237,7 +237,7 @@ def installed_software():
 
     logger.info("Collecting installed software...")
 
-    software = execute_command(
+    software = run_command(
 
         'wmic product get Name,Version'
 
@@ -257,7 +257,7 @@ def firewall_status():
 
     logger.info("Collecting Windows Firewall status...")
 
-    firewall = execute_command(
+    firewall = run_command(
 
         "netsh advfirewall show allprofiles"
 
@@ -278,7 +278,7 @@ def defender_status():
 
     logger.info("Collecting Windows Defender status...")
 
-    defender = execute_command(
+    defender = run_command(
 
         'powershell "Get-MpComputerStatus"'
 
@@ -299,7 +299,7 @@ def event_log_summary():
 
     logger.info("Collecting Windows Event Log summary...")
 
-    events = execute_command(
+    events = run_command(
 
         'wevtutil qe System /c:25 /rd:true /f:text'
 
@@ -320,7 +320,7 @@ def local_users():
 
     logger.info("Collecting local user accounts...")
 
-    users = execute_command(
+    users = run_command(
 
         "net user"
 
@@ -341,7 +341,7 @@ def shared_folders():
 
     logger.info("Collecting shared folders...")
 
-    shares = execute_command(
+    shares = run_command(
 
         "net share"
 
@@ -362,7 +362,7 @@ def environment_variables():
 
     logger.info("Collecting environment variables...")
 
-    environment = execute_command(
+    environment = run_command(
 
         "set"
 
