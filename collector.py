@@ -1,20 +1,32 @@
+BANNER = r"""
+============================================================
+   _____ ___ ____ _____
+  / ____|_ _|  _ \_   _|
+ | |     | || |_) || |
+ | |     | ||  _ < | |
+ | |_____| || |_) || |_
+  \_____|___|____/_____|
+
+ Claus Incident Response Toolkit
+ Version 1.0.0
+============================================================
+"""
 """
 =========================================================
 Claus Incident Response Toolkit (CIRT)
 
 Main Controller
 
-Description
------------
-Coordinates the complete CIRT workflow:
+Coordinates the complete workflow:
 
     • Detect Operating System
     • Collect Live Evidence
+    • Run IOC Analysis
     • Generate Reports
     • Package Evidence
 
 Author : Claudias Musavini Misiko
-Version: 1.0.0
+Version: 2.0.0
 =========================================================
 """
 
@@ -26,8 +38,11 @@ from logger import logger
 from reporting.generator import ReportGenerator
 
 from packaging.package import package_evidence
+
 from collectors.linux import collect_linux
 from collectors.windows import collect_windows
+
+from ioc.scanner import IOCScanner
 
 
 # ==========================================================
@@ -36,12 +51,8 @@ from collectors.windows import collect_windows
 
 class CIRT:
 
-    """
-    Claus Incident Response Toolkit.
-    """
-
     def __init__(self):
-
+        print(BANNER)
         logger.info("=" * 60)
         logger.info("Starting Claus Incident Response Toolkit")
         logger.info("=" * 60)
@@ -49,131 +60,48 @@ class CIRT:
         self.operating_system = platform.system()
 
         logger.info(
-
             f"Detected Operating System: {self.operating_system}"
-
         )
 
         self.collector = None
-
-        self.evidence = None
-
-
+        self.evidence = {}
+        self.reports = {}
+        self.package = {}
 # ==========================================================
-# Detect Collector
+# Collector Selection
 # ==========================================================
 
     def initialize_collector(self):
-
         """
-        Select the correct evidence collector.
+        Select the appropriate evidence collector.
         """
 
         if self.operating_system == "Linux":
 
-           logger.info("Initializing Linux Collector")
+            logger.info("Initializing Linux Collector")
 
-           self.collector = collect_linux
+            self.collector = collect_linux
 
         elif self.operating_system == "Windows":
 
-           logger.info("Initializing Windows Collector")
+            logger.info("Initializing Windows Collector")
 
-           self.collector = collect_windows
+            self.collector = collect_windows
 
         else:
 
             logger.error(
-
-                f"Unsupported operating system: {self.operating_system}"
-
+                f"Unsupported Operating System: {self.operating_system}"
             )
 
             sys.exit(1)
 # ==========================================================
-# Collect Evidence
-# ==========================================================
-
-    # ==========================================================
-# Collect Evidence
+# Evidence Collection
 # ==========================================================
 
     def collect_evidence(self):
         """
-        Run the selected evidence collector.
-        """
-
-        logger.info("Starting evidence collection...")
-
-        self.evidence = self.collector()
-
-        if not self.evidence.get("success"):
-
-            logger.error("Evidence collection failed.")
-
-            sys.exit(1)
-
-        logger.info("Evidence collection completed successfully.")
-
-
-# ==========================================================
-# Generate Reports
-# ==========================================================
-
-    def generate_reports(self):
-
-        """
-        Generate all report formats.
-        """
-
-        logger.info("Starting report generation...")
-
-        generator = ReportGenerator(
-            output_directory="reports"
-        )
-
-        reports = generator.generate(
-            self.evidence
-        )
-
-        logger.info("Report generation completed.")
-
-        return reports
-
-
-# ==========================================================
-# Package Evidence
-# ==========================================================
-
-    def package_evidence(self):
-
-        """
-        Create hashes, manifest, chain of custody,
-        and ZIP archive.
-        """
-
-        logger.info("Starting evidence packaging...")
-
-        package = package_evidence(
-            evidence_directory="reports",
-            case_number="CASE-001",
-            investigator="Claudias Musavini",
-        )
-
-        logger.info("Evidence packaging completed.")
-
-        return package
-# ==========================================================
-# Execute CIRT Workflow
-# ==========================================================
-
-    def run(self):
-        """
-        Execute the complete CIRT workflow.
-
-        Returns
-        -------
-        bool
+        Collect live evidence from the target operating system.
         """
 
         logger.info("=" * 60)
@@ -182,87 +110,134 @@ class CIRT:
 
         self.initialize_collector()
 
-        # --------------------------------------------------
-        # Collect Live Evidence
-        # --------------------------------------------------
-
         self.evidence = self.collector()
 
         if not self.evidence.get("success", False):
 
             logger.error("Evidence collection failed.")
 
-            return False
+            sys.exit(1)
 
         logger.info("Evidence collection completed successfully.")
 
-        # --------------------------------------------------
-        # Generate Reports
-        # --------------------------------------------------
+        return self.evidence
+
+
+# ==========================================================
+# IOC Analysis
+# ==========================================================
+
+    def analyze_iocs(self):
+        """
+        Run IOC detection against collected evidence.
+        """
+
+        logger.info("=" * 60)
+        logger.info("Starting IOC Analysis")
+        logger.info("=" * 60)
+
+        scanner = IOCScanner()
+
+        ioc_results = scanner.analyze(    self.evidence,    self.operating_system)
+
+        self.evidence["ioc_analysis"] = ioc_results
+
+        logger.info("IOC Analysis completed successfully.")
+
+        return ioc_results
+# ==========================================================
+# Report Generation
+# ==========================================================
+
+    def generate_reports(self):
+        """
+        Generate all report formats.
+        """
 
         logger.info("=" * 60)
         logger.info("Generating Reports")
         logger.info("=" * 60)
 
-        report_generator = ReportGenerator()
+        generator = ReportGenerator(
+            output_directory="reports"
+        )
 
-        reports = report_generator.generate(
-
+        self.reports = generator.generate(
             self.evidence
-
         )
 
-        logger.info(
+        logger.info("Report generation completed.")
 
-            f"Generated {len(reports)} report(s)."
+        return self.reports
 
-        )
 
-        # --------------------------------------------------
-        # Package Evidence
-        # --------------------------------------------------
+# ==========================================================
+# Evidence Packaging
+# ==========================================================
+
+    def package_evidence(self):
+        """
+        Package the investigation into a forensic archive.
+        """
 
         logger.info("=" * 60)
         logger.info("Packaging Evidence")
         logger.info("=" * 60)
 
-        package_results = package_evidence()
+        self.package = package_evidence(
+             evidence_directory="reports",
+             case_number="CASE-001",
+             investigator="Claudias Musavini",
+)
+
+        logger.info("Evidence packaging completed.")
+
+        return self.package
+
+# ==========================================================
+# Execute Complete Workflow
+# ==========================================================
+
+    def run(self):
+        """
+        Execute the complete CIRT workflow.
+        """
+
+        # Step 1 - Collect Evidence
+        self.collect_evidence()
+
+        # Step 2 - Analyze IOCs
+        self.analyze_iocs()
+
+        # Step 3 - Generate Reports
+        self.generate_reports()
+
+        # Step 4 - Package Evidence
+        self.package_evidence()
 
         # --------------------------------------------------
         # Execution Summary
         # --------------------------------------------------
 
         print()
-
         print("=" * 60)
         print("CIRT EXECUTION SUMMARY")
         print("=" * 60)
 
         print(f"Operating System : {self.operating_system}")
-
-        collector_name = self.evidence.get("collector", "Unknown")
-
-        print(
-            f"Collector        : {collector_name}"
-        )
-
-        print(
-            f"Evidence         : {'SUCCESS' if self.evidence.get('success') else 'FAILED'}"
-        )
-
-        print(
-            f"Reports          : {len(reports)} Generated"
-        )
-
-        print(
-            f"Archive          : {package_results['archive']}"
-        )
+        print(f"Collector        : {self.evidence.get('collector', 'Unknown')}")
+        print(f"Evidence         : {'SUCCESS' if self.evidence.get('success') else 'FAILED'}")
+        print(f"IOC Analysis     : Completed")
+        print(f"Reports          : {len(self.reports)} Generated")
+        print(f"Archive          : {self.package['archive']}")
 
         print("=" * 60)
 
         logger.info("CIRT execution completed successfully.")
 
         return True
+
+
 # ==========================================================
 # Main Entry Point
 # ==========================================================
@@ -273,8 +248,4 @@ if __name__ == "__main__":
 
     success = application.run()
 
-    if success:
-
-        sys.exit(0)
-
-    sys.exit(1)
+    sys.exit(0 if success else 1)

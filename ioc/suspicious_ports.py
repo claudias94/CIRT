@@ -420,15 +420,39 @@ class SuspiciousPortDetector:
 
         port_data = ""
 
+        # --------------------------------------------
+        # Listening Ports
+        # --------------------------------------------
+
         if "listening_ports" in evidence:
 
-            port_data += evidence["listening_ports"]
+            listening_ports = evidence["listening_ports"]
+
+            if isinstance(listening_ports, list):
+
+                port_data += "\n".join(listening_ports)
+
+            else:
+
+                port_data += str(listening_ports)
 
             port_data += "\n"
 
+        # --------------------------------------------
+        # Network Connections
+        # --------------------------------------------
+
         if "network_connections" in evidence:
 
-            port_data += evidence["network_connections"]
+            network_connections = evidence["network_connections"]
+
+            if isinstance(network_connections, list):
+
+                port_data += "\n".join(network_connections)
+
+            else:
+
+                port_data += str(network_connections)
 
             port_data += "\n"
 

@@ -14,7 +14,7 @@ on Linux and Windows systems.
 """
 
 from logger import logger
-
+from ioc.helpers import normalize_text
 from ioc.indicators import IOC_RISK_SCORES
 
 
@@ -193,12 +193,8 @@ class PersistenceDetector:
         # Running Services
         # --------------------------------------------------
 
-        services = evidence.get(
-
-            "running_services",
-
-            "",
-
+        services = normalize_text(
+           evidence.get("running_services")
         )
 
         self.total_checks += 1
@@ -233,13 +229,9 @@ class PersistenceDetector:
         # Logged-in Users / SSH
         # --------------------------------------------------
 
-        users = evidence.get(
-
-            "logged_in_users",
-
-            "",
-
-        )
+        users = normalize_text(
+           evidence.get("logged_in_users")
+         )
 
         self.total_checks += 1
 
@@ -257,12 +249,8 @@ class PersistenceDetector:
         # Running Processes
         # --------------------------------------------------
 
-        processes = evidence.get(
-
-            "running_processes",
-
-            "",
-
+        processes = normalize_text(
+           evidence.get("running_processes")
         )
 
         self.total_checks += 1
@@ -295,12 +283,8 @@ class PersistenceDetector:
         # Environment Variables
         # --------------------------------------------------
 
-        environment = evidence.get(
-
-            "environment_variables",
-
-            "",
-
+        environment = normalize_text(
+            evidence.get("environment_variables")
         )
 
         self.total_checks += 1
@@ -345,7 +329,7 @@ class PersistenceDetector:
         # Scheduled Tasks
         # --------------------------------------------------
 
-        scheduled_tasks = evidence.get(
+        scheduled_tasks = normalize_text(
 
             "scheduled_tasks",
 
@@ -369,14 +353,12 @@ class PersistenceDetector:
         # Running Services
         # --------------------------------------------------
 
-        services = evidence.get(
+        services = normalize_text(
 
             "running_services",
 
             "",
-
         )
-
         self.total_checks += 1
 
         suspicious_services = [
@@ -405,7 +387,7 @@ class PersistenceDetector:
         # Running Processes
         # --------------------------------------------------
 
-        processes = evidence.get(
+        processes = normalize_text(
 
             "running_processes",
 

@@ -19,7 +19,7 @@ with evidence collected from both Linux and Windows.
 import re
 
 from logger import logger
-
+from ioc.helpers import normalize_text
 from ioc.indicators import (
     SUSPICIOUS_PROCESSES,
     LOLBINS,
@@ -583,9 +583,8 @@ class SuspiciousProcessDetector:
         logger.info("Starting suspicious process analysis")
         logger.info("=" * 60)
 
-        process_output = evidence.get(
-            "running_processes",
-            "",
+        process_output = normalize_text(
+            evidence.get("running_processes")
         )
 
         self.scan_processes(process_output)

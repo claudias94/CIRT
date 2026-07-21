@@ -1,9 +1,27 @@
 # Python
 __pycache__/
-*.pyc
+*.py[cod]
+*.pyo
 
-# Reports
-reports/
+# Virtual environments
+venv/
+.env
+
+# IDE
+.vscode/
+.idea/
 
 # Logs
 *.log
+
+# Runtime reports
+reports/*
+!reports/.gitkeep
+
+# Temporary backups
+*.backup
+*.bak
+
+# Operating System
+.DS_Store
+Thumbs.db

@@ -18,7 +18,7 @@ import ipaddress
 import re
 
 from logger import logger
-
+from ioc.helpers import normalize_text
 from ioc.indicators import (
     MALICIOUS_IPS,
     IOC_RISK_SCORES,
@@ -482,11 +482,9 @@ class SuspiciousIPDetector:
         logger.info("Starting suspicious IP analysis")
         logger.info("=" * 60)
 
-        connection_data = evidence.get(
-            "network_connections",
-            "",
+        connection_data = normalize_text(
+           evidence.get("network_connections")
         )
-
         self.scan_connections(connection_data)
 
         self.detect_public_ips(connection_data)

@@ -1,4 +1,12 @@
 """
+CIRT Configuration
+"""
+
+__version__ = "1.0.0"
+__author__ = "Claudias Musavini Misiko"
+__project__ = "Claus Incident Response Toolkit"
+__license__ = "MIT"
+"""
 =========================================================
 Claus Incident Response Toolkit (CIRT)
 Configuration Module
